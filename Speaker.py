@@ -4,9 +4,14 @@ import random
 
 class Speaker:
 
-    def __init__(self, VisualWorld, Bias):
+    def __init__(self, VisualWorld, Bias, rationalitynoise=0.1):
         self.VisualWorld = VisualWorld
         self.Bias = Bias
+        # rationality noise
+        # introduces a small probability
+        # that the speaker will fail to
+        # be overly specific even when she knows that she should.
+        self.rationalitynoise = 0.1
 
     def SampleUtterance(self, target):
         """
@@ -36,4 +41,7 @@ class Speaker:
         if len(Inferred) == 1:
             return Utterance
         else:
-            return [target.name, target.feature]
+            if random.random() < self.rationalitynoise:
+                return [target.name, None]
+            else:
+                return [target.name, target.feature]
