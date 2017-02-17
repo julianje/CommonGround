@@ -1,3 +1,6 @@
+import Belief
+
+
 class SimpleListener:
 
     def __init__(self, VisualWorld):
@@ -6,18 +9,18 @@ class SimpleListener:
         """
         self.VisualWorld = VisualWorld
 
-    def InferReferent(self, Utterance, ReturnIDs=False):
+    def InferReferent(self, Utterance):
         """
         Given an utterance return a set of referents.
         The utterance is a list with a name and a feature (which might be empty).
-        When return IDs is true return a list with beli
         """
-        results = [self.TestObject(x, Utterance) for x in self.VisualWorld.objects]
-        Norm = sum(results)
-        if not ReturnIDs:
-            return [x*1.0/Norm for x in results]
-        else:
-            return [[x*1.0/Norm for x in results], self.VisualWorld.GetIDs()]
+        results = [self.TestObject(x, Utterance)
+                   for x in self.VisualWorld.objects]
+        # Create a belief object with the results
+        results = Belief.Belief(
+            len(results), self.VisualWorld.GetIDs(), results)
+        results.Normalize()
+        return results
 
     def TestObject(self, referent, utterance):
         """
