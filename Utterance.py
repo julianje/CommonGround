@@ -4,7 +4,7 @@ import sys
 
 class Utterance:
 
-    def __init__(self, name, features=[]):
+    def __init__(self, name, inputfeatures=None):
         """
         Build a simple class to capture utterances.
 
@@ -12,13 +12,15 @@ class Utterance:
         name (str): object name
         features (list): list of ObjectFeatures that were used.
         """
+        if inputfeatures is None:
+            inputfeatures = []
         self.name = name
         # Make sure you got a list of object features.
-        if sum([isinstance(x, OF.ObjectFeature) for x in features]) != len(features):
+        if sum([isinstance(x, OF.ObjectFeature) for x in inputfeatures]) != len(inputfeatures):
             print "PhysicalObject error. second argument is not a list of ObjectFeature objects."
             self.features = []
         else:
-            self.features = features
+            self.features = inputfeatures
 
     def InsertFeature(self, feature):
         """
