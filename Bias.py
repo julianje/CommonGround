@@ -8,12 +8,12 @@ class Bias:
         self.BiasType = BiasType
         self.BiasValue = BiasValue
 
-    def GetBias(self, Type):
+    def GetBias(self, feature):
         """
         Return the bias for a given feature.
         Returns 0 bias if feature does not exist.
         """
-        if Type in self.BiasType:
-            return self.BiasValue[self.BiasType.index(Type)]
+        if feature.type in self.BiasType:
+            return self.BiasValue[self.BiasType.index(feature.type)]
         else:
             return 0
