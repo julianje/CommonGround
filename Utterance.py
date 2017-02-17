@@ -1,4 +1,5 @@
 import ObjectFeature as OF
+import sys
 
 
 class Utterance:
@@ -18,6 +19,20 @@ class Utterance:
             self.features = []
         else:
             self.features = features
+
+    def InsertFeature(self, feature):
+        """
+        Add a new feature
+        """
+        self.features.append(feature)
+
+    def Print(self):
+        """
+        Print the utterance
+        """
+        for feature in self.features:
+            sys.stdout.write(str(feature.feature)+" ")
+        sys.stdout.write(str(self.name)+"\n")
 
     def __eq__(self, other):
         """
