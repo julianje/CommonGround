@@ -49,11 +49,9 @@ class Speaker:
         # Try the simplest utterance first but with
         # a baseline bias for producing a more complex utterance.
         Utterance = self.SampleUtterance(target)
-        Inferred = ImaginedListener.RecoverWord(Utterance)
-        if len(Inferred) == 1:
-            return Utterance
-        else:
-            if random.random() < self.rationalitynoise:
-                return [target.name, None]
-            else:
-                return [target.name, target.feature]
+        InferredBelief = ImaginedListener.InferReferent(Utterance)
+        # Loop here until you find a suitable utterance
+        while(not InferredBelief.Certain()):
+            Utterance = self.SampleUtterance(target)
+            InferredBelief = ImaginedListener.InferReferent(Utterance)
+        return Utterance
