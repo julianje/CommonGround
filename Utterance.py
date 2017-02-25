@@ -32,9 +32,13 @@ class Utterance:
         """
         Print the utterance
         """
+        mainlabel = self.name
         for feature in self.features:
-            sys.stdout.write(str(feature.feature)+" ")
-        sys.stdout.write(str(self.name)+"\n")
+            if feature.type != "category":
+                sys.stdout.write(str(feature.feature)+" ")
+            else:
+                mainlabel = feature.feature
+        sys.stdout.write(str(mainlabel)+"\n")
 
     def __eq__(self, other):
         """
