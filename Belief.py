@@ -18,6 +18,7 @@ class Belief:
         names (list): Optional list of names of each hypothesis
         prior (list): optional list indicating the prior
         """
+        self.HypothesisSize = HypothesisSize
         if prior is not None:
             if len(prior) != HypothesisSize:
                 print "ERROR: Warning has a different size than hypothesis space size"
