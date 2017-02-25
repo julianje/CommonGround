@@ -1,3 +1,6 @@
+import Belief
+
+
 class VisualWorld:
 
     def __init__(self, objects):
@@ -35,3 +38,9 @@ class VisualWorld:
         return a list of object Ids, or basic name when Ids not available.
         """
         return [x.GetID() for x in self.objects]
+
+    def BuildPrior(self):
+        """
+        Build a probability distribution over the objects in the visual world and return Belief object
+        """
+        return Belief.Belief(len(self.objects), self.GetIDs())
