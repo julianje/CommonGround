@@ -1,8 +1,10 @@
 import copy
 import numpy as np
 import VisualWorld as VW
+import Belief
 from itertools import compress
 from itertools import product
+import scipy.stats as st
 
 
 def BuildVWHypSpace(VisualWorld, CGprior):
@@ -63,3 +65,15 @@ def BuildBiasHypSpace(BiasPriors):
     probs = product(*BiasProbs)
     probs = [np.prod(list(x)) for x in probs]
     return [result, probs]
+
+
+def BuildBeta(alpha, beta, name=None, granularity=0.1):
+    """
+    Pack a beta distribution into a Belief object
+    """
+    values = list(np.arange(0, 1, granularity))
+    HypothesisSize = len(values)
+    prior = st.beta.pdf(values, alpha, beta)
+    distribution = Belief.Belief(HypothesisSize, values, prior, name)
+    distribution.Normalize()
+    return distribution
