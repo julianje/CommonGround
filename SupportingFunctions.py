@@ -1,7 +1,6 @@
 import copy
 import numpy as np
 import VisualWorld as VW
-import Bias as BS
 from itertools import compress
 from itertools import product
 
@@ -55,7 +54,6 @@ def BuildBiasHypSpace(BiasPriors):
     BiasPriors: a list of Belief objects.
     """
     # Compute the hypothesis space size.
-    HypSpaceSize = np.prod([x.HypothesisSize for x in BiasPriors])
     # Retrieve hypothesis space lists.
     BiasValues = [x.values for x in BiasPriors]
     result = product(*BiasValues)
@@ -65,8 +63,3 @@ def BuildBiasHypSpace(BiasPriors):
     probs = product(*BiasProbs)
     probs = [np.prod(list(x)) for x in probs]
     return [result, probs]
-
-
-
-
-
