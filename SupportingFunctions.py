@@ -71,7 +71,7 @@ def BuildBeta(alpha, beta, name=None, granularity=0.1):
     """
     Pack a beta distribution into a Belief object
     """
-    values = list(np.arange(0, 1, granularity))
+    values = list(np.arange(granularity, 1, granularity))
     HypothesisSize = len(values)
     prior = st.beta.pdf(values, alpha, beta)
     distribution = Belief.Belief(HypothesisSize, values, prior, name)
