@@ -7,7 +7,7 @@ class Belief:
     Simple class to store belief distributions
     """
 
-    def __init__(self, HypothesisSize, values=None, name=None, prior=None):
+    def __init__(self, HypothesisSize, values=None, prior=None, name=None):
         """
         Generate a belief distribution of size HypothesisSize.
         By default a uniform prior is built. But if a vector with priors is provided
@@ -15,9 +15,9 @@ class Belief:
 
         Args:
         HypothesisSize (int): Number of hypothesis
-        values (list): Optional list of values of each hypothesis
-        name (str): name that can be used to identify its content.
+        values (list): Optional list of values of each hypothesis.
         prior (list): optional list indicating the prior
+        name (str): name that can be used to identify its content.
         """
         self.HypothesisSize = HypothesisSize
         self.name = name
