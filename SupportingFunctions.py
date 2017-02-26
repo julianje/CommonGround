@@ -1,36 +1,72 @@
 import copy
 import numpy as np
+import VisualWorld as VW
+import Bias as BS
+from itertools import compress
+from itertools import product
 
 
-def BuildVisualWorldHypothesisSpace(priors):
+def BuildVWHypSpace(VisualWorld, CGprior):
     """
-    Build a list of lists where each list has boolean markers indicating whether
-    the object should be there. The function omits the empty set.
+    Build a hypothesis space of visualworlds
+    (by building all non-empty subsets of the listeners visual world; including the full set)
+    together with priors.
 
     Args:
-    prior: Object of class belief. Each entry in the belief object is a prior over a visual world.
+    VisualWorld: Object of type VisualWorld.
+    CGprior: Object of class belief. Each entry in the belief object is a prior over a visual world.
     """
     # Build the first entry:
-    size = priors.HypothesisSize
-    SubsetIndex = [[0] * size]
-    SubsetIndex[0][0] = 1
+    size = CGprior.HypothesisSize
+    SubsetIndex = [[False] * size]
+    SubsetIndex[0][0] = True
     CurrentEntry = SubsetIndex[0]
     # First adjust the prior for the first entry
     SubsetPriors = []
-    SubsetPriors.append(np.prod([(priors.probs[x]*CurrentEntry[x])+((1-priors.probs[x])*np.abs(1-CurrentEntry[x])) for x in range(size)]))
-    while(CurrentEntry != [1] * size):
+    SubsetPriors.append(np.prod([(CGprior.probs[
+                        x]*CurrentEntry[x])+((1-CGprior.probs[x])*np.abs(1-CurrentEntry[x])) for x in range(size)]))
+    while(CurrentEntry != [True] * size):
         NextEntry = copy.deepcopy(CurrentEntry)
         Index = 0
-        while(NextEntry[Index] == 1):
-            NextEntry[Index] = 0
+        while(NextEntry[Index] is True):
+            NextEntry[Index] = False
             Index += 1
-        NextEntry[Index] = 1
+        NextEntry[Index] = True
         SubsetIndex.append(NextEntry)
         CurrentEntry = NextEntry
         # Add the new prior
-        SubsetPriors.append(np.prod([(priors.probs[x]*CurrentEntry[x])+((1-priors.probs[x])*np.abs(1-CurrentEntry[x])) for x in range(size)]))
+        SubsetPriors.append(np.prod([(CGprior.probs[
+                            x]*CurrentEntry[x])+((1-CGprior.probs[x])*np.abs(1-CurrentEntry[x])) for x in range(size)]))
     # Since we are not considering the hypothesis where the speaker cannot see anything, we
     # need to renormalize the prior.
     Norm = sum(SubsetPriors)
     SubsetPriors = [x*1.0/Norm for x in SubsetPriors]
-    return [SubsetIndex, SubsetPriors]
+    # Now use the SubsetIndex to build a set of visual worlds.
+    VWHypothesisSpace = [VW.VisualWorld(
+        list(compress(VisualWorld.objects, Indices))) for Indices in SubsetIndex]
+    return [VWHypothesisSpace, SubsetPriors]
+
+
+def BuildBiasHypSpace(BiasPriors):
+    """
+    Build a hypothesis space of the speaker's biases over different features.
+
+    Args:
+    BiasPriors: a list of Belief objects.
+    """
+    # Compute the hypothesis space size.
+    HypSpaceSize = np.prod([x.HypothesisSize for x in BiasPriors])
+    # Retrieve hypothesis space lists.
+    BiasValues = [x.values for x in BiasPriors]
+    result = product(*BiasValues)
+    result = [list(x) for x in result]
+    # Now get the probabilities
+    BiasProbs = [x.probs for x in BiasPriors]
+    probs = product(*BiasProbs)
+    probs = [np.prod(list(x)) for x in probs]
+    return [result, probs]
+
+
+
+
+
