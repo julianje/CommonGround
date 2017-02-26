@@ -22,6 +22,11 @@ class ComplexListener:
         """
         self.VisualWorld = VisualWorld
         self.CommonGroundPrior = CommonGroundPrior
+        # This code assumes that the order of the Common ground prior
+        # matches the order of the objects in the visual world. So just run a
+        # sanity check
+        if CommonGroundPrior.values != [obj.name for obj in VisualWorld.objects]:
+            print "ERROR: CommonGround prior object doesn't match the VisualWorld objects (order matters)."
         self.BiasPriors = BiasPriors
         self.HypothesisSpace = []
 
@@ -70,7 +75,7 @@ class ComplexListener:
 
     def ComputePosterior(self):
         """
-        Given the hypothesis space, compute the belief in speaker biases, 
+        Given the hypothesis space, compute the belief in speaker biases,
         visual access, and referent.
         """
         # First compute the belief in each target.
@@ -94,4 +99,20 @@ class ComplexListener:
                 if self.HypothesisSpace[HypothesisIndex][2] == refobject:
                     p += Posteriors[HypothesisIndex]
             ReferentBeliefs.append([refobject.Id, p])
-        return [CGBeliefs, ReferentBeliefs]
+        # Next compute the posterior of each bias.
+        BiasPosteriors = []
+        # For each source of bias
+        for i in range(len(self.BiasPriors)):
+            # Iterate over each value
+            Name = self.BiasPriors[i].name
+            Domain = self.BiasPriors[i].values
+            probs = []
+            for DomainIndex in range(len(Domain)):
+                CurrDomain = Domain[DomainIndex]
+                p = 0
+                for HypIndex in range(len(self.HypothesisSpace)):
+                    if self.HypothesisSpace[HypIndex][1][i] == CurrDomain:
+                        p += Posteriors[HypIndex]
+                probs.append(p)
+            BiasPosteriors.append([Name, Domain, probs])
+        return [CGBeliefs, ReferentBeliefs, BiasPosteriors]
