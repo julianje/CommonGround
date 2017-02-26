@@ -1,104 +1,97 @@
 import copy
 import Speaker
 import sys
-import VisualWorld
 import ReferentBelief
+import Bias
+import SupportingFunctions as SF
 
 
 class ComplexListener:
 
-    def __init__(self, Bias, VisualWorld, CommonGroundPrior):
+    def __init__(self, VisualWorld, CommonGroundPrior, BiasPriors):
         """
-        Bias and VisualWorld are objects of that type.
-        CommonGroundPrior is a list of the same length as
-        the number of objects in the visual world and they
-        indicate the probability that the object is
-        common ground.
+        VisualWorld is a VisualWorld object.
+        CommonGroundPrior is a belief object.
+        BiasPriors is a list of Belief objects that represent belief distributions over each kind
+        of production bias that the speaker may have.
+
+        Args:
+        VisualWorld: Object of class VisualWorld
+        CommonGroundPrior: Object of class Belief
+        BiasPriors: List of objects of type belief
         """
-        self.Bias = Bias
         self.VisualWorld = VisualWorld
-        # Sanity check that CommonGroundPrior makes sense
-        if len(CommonGroundPrior) != len(self.VisualWorld.objects):
-            print "Error: Prior doesn't match size of visual world"
-        else:
-            self.CommonGroundPrior = CommonGroundPrior
+        self.CommonGroundPrior = CommonGroundPrior
+        self.BiasPriors = BiasPriors
+        self.HypothesisSpace = []
 
-    def JointInference(self, utterance, samples=100, verbose=True):
+    def Infer(self, utterance, samples=1000):
         """
-        Given an utterance jointly infer what object the speaker
-        was talking about, and their knowledge. To do this, integrate
-        over all the possible visual worlds the agent could have, times
-        the probability of the utterance, and weight by the prior.
+        Build a hypothesis space, where each hypothesis consists of a Speaker object
+        together with a referent, and a prior.
+        And then compute the prior and posterior given an utterance.
 
-        utterance should be a list of two items where the first entry determines
-        the speaker's base noun and the second utterance the extra information (if any)
+        Args:
+        utterance: Object from Utterance class
+        samples: Number of samples to use to estimate the probability of the utterance in each hypothesis space
 
-        samples indicated how many samples to draw from each utterance.
+        Returns:
+        List of lists. Each sublist contains:
+        [VisualWorld object, Speaker bias vector, testedobject (PhysicalObject), visual world prior, speaker bias prior, likelihood.]
         """
-        # For now, model only supports priors that are either 0 or 0.5.
-        # Create a model of the speaker's visual world
-        SpeakerVisualWorld = copy.deepcopy(self.VisualWorld)
-        # Create a model of the speaker.
-        ImaginedSpeaker = Speaker.Speaker(SpeakerVisualWorld, self.Bias)
-        # Now, for each target in the visual world, get what the speaker would
-        # have said.
-        # print "Testing full visual world...\n"
-        # Build a referent belief to store the probability of the referrent.
-        FullKnowledgeBeliefs = ReferentBelief.ReferentBelief(
-            SpeakerVisualWorld)
-        for TestReferent in ImaginedSpeaker.VisualWorld.objects:
-            # Run a large set of imagined speakers.
-            for sample in range(samples):
-                FullKnowledgeBeliefs.insert(
-                    TestReferent, ImaginedSpeaker.Communicate(TestReferent))
-        # Assuming that there is only one place where CommonGroundPrior
-        # is different from 0. Delete it.
-        ObjectIndex = self.CommonGroundPrior.index(0.5)
-        SimpleVisualWorld = copy.deepcopy(SpeakerVisualWorld)
-        # sys.stdout.write(
-        #    "Deleting object "+str(SpeakerVisualWorld.objects[ObjectIndex]))
-        # sys.stdout.write("\n"+str(SimpleVisualWorld.objects))
-        # This deletion will return the deleted object
-        # but we don't need it
-        Discard = SimpleVisualWorld.Delete(
-            SpeakerVisualWorld.objects[ObjectIndex])
-        # print SimpleVisualWorld.objects
-        ImaginedSpeaker = Speaker.Speaker(SimpleVisualWorld, self.Bias)
-        # print "Testing simple visual world...\n"
-        PartialKnowledgeBeliefs = ReferentBelief.ReferentBelief(
-            SimpleVisualWorld)
-        for TestReferent in ImaginedSpeaker.VisualWorld.objects:
-            for sample in range(samples):
-                PartialKnowledgeBeliefs.insert(
-                    TestReferent, ImaginedSpeaker.Communicate(TestReferent))
-        # Now we can compute the probability of each target jointly with
-        # knowledge or ignorance.
-        FullKnowledgeBeliefs.ComputeProbability(utterance)
-        PartialKnowledgeBeliefs.ComputeProbability(utterance)
-        # return [FullKnowledgeBeliefs, PartialKnowledgeBeliefs]
-        # Compute probability that the speaker had full knowledge:
-        ProbKnowledge = sum(FullKnowledgeBeliefs.prob)*1.0 / \
-            (sum(FullKnowledgeBeliefs.prob)+sum(PartialKnowledgeBeliefs.prob))
-        # Make a guess about which object the agent was talking about.
-        referent = []
-        feature = []
-        probability = []
-        for i in range(len(FullKnowledgeBeliefs.VisualWorld.objects)):
-            referent.append(FullKnowledgeBeliefs.VisualWorld.objects[i].name)
-            feature.append(FullKnowledgeBeliefs.VisualWorld.objects[i].feature)
-            probability.append(FullKnowledgeBeliefs.prob[i])
-            if PartialKnowledgeBeliefs.VisualWorld.Contains(FullKnowledgeBeliefs.VisualWorld.objects[i]):
-                tempindex = PartialKnowledgeBeliefs.VisualWorld.GetIndex(
-                    FullKnowledgeBeliefs.VisualWorld.objects[i])
-                probability[i] += PartialKnowledgeBeliefs.prob[tempindex]
-        norm = sum(probability)
-        if norm == 0:
-            print "Error! All probabilities are zero :("
-        probability = [x*1.0/norm for x in probability]
-        if verbose:
-            sys.stdout.write(
-                "\nProbability of common ground: "+str(ProbKnowledge)+"\n")
-            sys.stdout.write("Inferred referent:\n")
-            sys.stdout.write(
-                str(referent)+"\n"+str(feature)+"\n"+str(probability))
-        return [ProbKnowledge, referent, feature, probability, FullKnowledgeBeliefs, PartialKnowledgeBeliefs]
+        self.HypothesisSpace = []
+        # Each speaker object needs a visual world, and a bias object.
+        # Build space of possible visual worlds
+        [VW_HypothesisSpace, VW_Priors] = SF.BuildVWHypSpace(
+            self.VisualWorld, self.CommonGroundPrior)
+        # Now build hypothesis spaces over speaker biases.
+        [SpeakerBias_HypothesisSpace, SpeakerBias_Priors] = SF.BuildBiasHypSpace(
+            self.BiasPriors)
+        # Next we need to combine these two to build a massive hypothesis
+        # space.
+        BiasNames = [x.name for x in self.BiasPriors]
+        for SB_index in range(len(SpeakerBias_Priors)):
+            # Pack things into a set of Bias objects
+            CurrentBias = Bias.Bias(
+                BiasNames, SpeakerBias_HypothesisSpace[SB_index])
+            for VW_index in range(len(VW_Priors)):
+                # Now we also need to build the space of possible referents.
+                # First build the speaker object.
+                TestSpeaker = Speaker.Speaker(
+                    VW_HypothesisSpace[VW_index], CurrentBias)
+                # Now iterate over the space of referents and get
+                # the probability of producing the utterance.
+                for testobject in TestSpeaker.VisualWorld.objects:
+                    p = TestSpeaker.GetUtteranceProbability(
+                        utterance, testobject, samples)
+
+                    self.HypothesisSpace.append([VW_HypothesisSpace[VW_index], SpeakerBias_HypothesisSpace[
+                                                SB_index], testobject, VW_Priors[VW_index], SpeakerBias_Priors[SB_index], p])
+
+    def ComputePosterior(self):
+        """
+        Given the hypothesis space, compute the belief in speaker biases, 
+        visual access, and referent.
+        """
+        # First compute the belief in each target.
+        # Kind of inefficient, but works.
+        # Build a normalizing vector
+        Posteriors = [x[3]*x[4]*x[5] for x in self.HypothesisSpace]
+        Norm = sum(Posteriors)
+        Posteriors = [x*1.0/Norm for x in Posteriors]
+        CGBeliefs = []
+        for cgobject in self.VisualWorld.objects:
+            p = 0
+            for HypothesisIndex in range(len(self.HypothesisSpace)):
+                if self.HypothesisSpace[HypothesisIndex][0].Contains(cgobject):
+                    p += Posteriors[HypothesisIndex]
+            CGBeliefs.append([cgobject.Id, p])
+        # Next compute the belief in each referent
+        ReferentBeliefs = []
+        for refobject in self.VisualWorld.objects:
+            p = 0
+            for HypothesisIndex in range(len(self.HypothesisSpace)):
+                if self.HypothesisSpace[HypothesisIndex][2] == refobject:
+                    p += Posteriors[HypothesisIndex]
+            ReferentBeliefs.append([refobject.Id, p])
+        return [CGBeliefs, ReferentBeliefs]
