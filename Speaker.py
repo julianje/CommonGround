@@ -20,6 +20,19 @@ class Speaker:
         self.Bias = Bias
         self.rationalitynoise = rationalitynoise
 
+    def GetUtteranceProbability(self, utterance, target, samples=1000):
+        """
+        Get the probability of an utterance by drawing a set of samples.
+
+        Args:
+        utterance: object of type utterance.
+        target: PhysicalObject object type.
+        samples: number of samples to draw.
+        """
+        utterances = [self.SampleUtterance(target) for x in range(samples)]
+        hits = sum([x == utterance for x in utterances])
+        return hits*1.0/samples
+
     def SampleUtterance(self, target):
         """
         Return a baseline utterance relying on the bias.
