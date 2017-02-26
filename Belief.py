@@ -7,7 +7,7 @@ class Belief:
     Simple class to store belief distributions
     """
 
-    def __init__(self, HypothesisSize, names=None, prior=None):
+    def __init__(self, HypothesisSize, values=None, name=None, prior=None):
         """
         Generate a belief distribution of size HypothesisSize.
         By default a uniform prior is built. But if a vector with priors is provided
@@ -15,10 +15,12 @@ class Belief:
 
         Args:
         HypothesisSize (int): Number of hypothesis
-        names (list): Optional list of names of each hypothesis
+        values (list): Optional list of values of each hypothesis
+        name (str): name that can be used to identify its content.
         prior (list): optional list indicating the prior
         """
         self.HypothesisSize = HypothesisSize
+        self.name = name
         if prior is not None:
             if len(prior) != HypothesisSize:
                 print "ERROR: Warning has a different size than hypothesis space size"
@@ -26,13 +28,13 @@ class Belief:
                 self.probs = prior
         else:
             self.probs = [1.0/HypothesisSize] * HypothesisSize
-        if names is not None:
-            if len(names) != HypothesisSize:
-                print "ERROR: List of names does not match hypothesis size."
+        if values is not None:
+            if len(values) != HypothesisSize:
+                print "ERROR: List of values does not match hypothesis size."
             else:
-                self.names = names
+                self.values = values
         else:
-            self.names = ["Item "+str(x) for x in range(HypothesisSize)]
+            self.values = range(HypothesisSize)
 
     def Normalize(self):
         Norm = sum(self.probs)
