@@ -29,7 +29,7 @@ class Speaker:
         target: PhysicalObject object type.
         samples: number of samples to draw.
         """
-        utterances = [self.SampleUtterance(target) for x in range(samples)]
+        utterances = [self.Communicate(target) for x in range(samples)]
         hits = sum([x == utterance for x in utterances])
         return hits*1.0/samples
 
