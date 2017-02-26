@@ -23,7 +23,7 @@ class Belief:
         self.name = name
         if prior is not None:
             if len(prior) != HypothesisSize:
-                print "ERROR: Warning has a different size than hypothesis space size"
+                print "ERROR: Warning, prior has a different size than hypothesis space size"
             else:
                 self.probs = prior
         else:
