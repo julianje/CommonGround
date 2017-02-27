@@ -25,7 +25,7 @@ class ComplexListener:
         # This code assumes that the order of the Common ground prior
         # matches the order of the objects in the visual world. So just run a
         # sanity check
-        if CommonGroundPrior.values != [obj.name for obj in VisualWorld.objects]:
+        if CommonGroundPrior.values != [obj.Id for obj in VisualWorld.objects]:
             print "ERROR: CommonGround prior object doesn't match the VisualWorld objects (order matters)."
         self.BiasPriors = BiasPriors
         self.HypothesisSpace = []
@@ -73,16 +73,20 @@ class ComplexListener:
                 # the probability of producing the utterance.
                 #sys.stdout.write("\t\titerating over referents.\n")
                 for testobject in TestSpeaker.VisualWorld.objects:
-                    #sys.stdout.write(".")
+                    # sys.stdout.write(".")
                     p = TestSpeaker.GetUtteranceProbability(
                         utterance, testobject, samples)
                     self.HypothesisSpace.append([VW_HypothesisSpace[VW_index], SpeakerBias_HypothesisSpace[
                                                 SB_index], testobject, VW_Priors[VW_index], SpeakerBias_Priors[SB_index], p])
 
-    def ComputePosterior(self):
+    def ComputePosterior(self, update=True):
         """
         Given the hypothesis space, compute the belief in speaker biases,
         visual access, and referent.
+
+        args:
+        update (bool): When set to True, the call also Updates the object's
+        posterior about what is common ground, and about the speaker's production biases.
         """
         # First compute the belief in each target.
         # Kind of inefficient, but works.
@@ -121,4 +125,22 @@ class ComplexListener:
                         p += Posteriors[HypIndex]
                 probs.append(p)
             BiasPosteriors.append([Name, Domain, probs])
+        # Check if we need to update representations
+        if update:
+            # Update speaker biases.
+            for BiasIndex in range(len(BiasPosteriors)):
+                BiasUpdate = BiasPosteriors[BiasIndex]
+                # BiasUpdate is a list where
+                # BiasUpdate[0] is a string with the Id
+                # BiasUpdate[1] is the domain and
+                # BiasUpdate[2] is the posterior.
+                # Check that the updater has the same name
+                if BiasUpdate[0] != self.BiasPriors[BiasIndex].name:
+                    print "WARNING: Bias names do not match. You probably have an error in the model specification."
+                self.BiasPriors[BiasIndex].probs = BiasUpdate[2]
+            # Update common ground beliefs.
+            for ObjectCGIndex in range(len(CGBeliefs)):
+                if self.CommonGroundPrior.values[ObjectCGIndex] != CGBeliefs[ObjectCGIndex][0]:
+                    print "WARNING: Commong ground prior names do not match. You probably have an error in your model specification."
+                self.CommonGroundPrior.probs[ObjectCGIndex] = CGBeliefs[ObjectCGIndex][1]
         return [CGBeliefs, ReferentBeliefs, BiasPosteriors]
