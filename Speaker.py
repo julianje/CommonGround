@@ -1,28 +1,53 @@
 import SimpleListener
 import random
+import Utterance
 
 
 class Speaker:
 
     def __init__(self, VisualWorld, Bias, rationalitynoise=0.1):
+        """
+        Create a new speaker with a visual world, a set of biases, and some rationality noise.
+
+        Args:
+        VisualWorld: Visualworld object type
+        Bias: object of Bias type
+        rationalitynoise (float): parameter showing amount of noise in rationality.
+        Rationality nosie introduced a small probability that the speaker will
+        fail to be overly specific even when there is reason to be.
+        """
         self.VisualWorld = VisualWorld
         self.Bias = Bias
-        # rationality noise
-        # introduces a small probability
-        # that the speaker will fail to
-        # be overly specific even when she knows that she should.
-        self.rationalitynoise = 0.1
+        self.rationalitynoise = rationalitynoise
+
+    def GetUtteranceProbability(self, utterance, target, samples=1000):
+        """
+        Get the probability of an utterance by drawing a set of samples.
+
+        Args:
+        utterance: object of type utterance.
+        target: PhysicalObject object type.
+        samples: number of samples to draw.
+        """
+        utterances = [self.Communicate(target) for x in range(samples)]
+        hits = sum([x == utterance for x in utterances])
+        return hits*1.0/samples
 
     def SampleUtterance(self, target):
         """
         Return a baseline utterance relying on the bias.
+
+        Args:
+        target: PhysicalObject type of object.
         """
-        basebias = self.Bias.BiasValue[
-            self.Bias.BiasType.index(target.featuretype)]
-        if random.random() < basebias:
-            return [target.name, target.feature]
-        else:
-            return [target.name, None]
+        # build a basic utterance
+        SampledUtterance = Utterance.Utterance(target.name)
+        # Now iterate over each feature, and sample a probability of using it.
+        for currentfeature in target.features:
+            basebias = self.Bias.GetBias(currentfeature)
+            if random.random() < basebias:
+                SampledUtterance.InsertFeature(currentfeature)
+        return SampledUtterance
 
     def Communicate(self, target):
         """
@@ -37,11 +62,9 @@ class Speaker:
         # Try the simplest utterance first but with
         # a baseline bias for producing a more complex utterance.
         Utterance = self.SampleUtterance(target)
-        Inferred = ImaginedListener.RecoverWord(Utterance)
-        if len(Inferred) == 1:
-            return Utterance
-        else:
-            if random.random() < self.rationalitynoise:
-                return [target.name, None]
-            else:
-                return [target.name, target.feature]
+        InferredBelief = ImaginedListener.InferReferent(Utterance)
+        # Loop here until you find a suitable utterance
+        while(not InferredBelief.Certain()):
+            Utterance = self.SampleUtterance(target)
+            InferredBelief = ImaginedListener.InferReferent(Utterance)
+        return Utterance
