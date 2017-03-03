@@ -26,9 +26,22 @@ class ComplexListener:
         # matches the order of the objects in the visual world. So just run a
         # sanity check
         if CommonGroundPrior.values != [obj.Id for obj in VisualWorld.objects]:
-            print "ERROR: CommonGround prior object doesn't match the VisualWorld objects (order matters)."
+            print "ERROR: CommonGround prior object doesn't match the VisualWorld objects. Perhaps you used PhysicalObject.name instead of PhysicalObject.Id in the common ground prior constructor? Is the order in the visual world different from the order in the common ground priors?"
         self.BiasPriors = BiasPriors
         self.HypothesisSpace = []
+
+    def ChangeVisualWorld(self, NewVisualWorld):
+        """
+        Change the visual world, and adjust
+        self.CommonGroundPrior and self.HypothesisSpace
+        to align with the new objects.
+        """
+        if len(self.VisualWorld.objects) != len(NewVisualWorld.objects):
+            print "ERROR (CL): New visual world should have the same number of objects as current visual world."
+            return None
+        self.VisualWorld = NewVisualWorld
+        self.CommonGroundPrior.values = [x.Id for x in NewVisualWorld.objects]
+        # Now align the hypothesis space.
 
     def Infer(self, utterance, samples=1000):
         """
