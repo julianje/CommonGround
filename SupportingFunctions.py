@@ -5,6 +5,7 @@ import Belief
 from itertools import compress
 from itertools import product
 import scipy.stats as st
+import sys
 
 
 def BuildVWHypSpace(VisualWorld, CGprior):
@@ -77,3 +78,24 @@ def BuildBeta(alpha, beta, name=None, granularity=0.1):
     distribution = Belief.Belief(HypothesisSize, values, prior, name)
     distribution.Normalize()
     return distribution
+
+
+def PrintCSV(results, Trial=None, header=True):
+    """
+    Take a result list obtained from ComplexListener.ComputePosterior() and
+    use it to print a csv file.
+    """
+    # Print header
+    if header:
+        sys.stdout.write("Trial,Variable,Type,Value\n")
+    # Now start with common ground inferences:
+    for CGObject in results[0]:
+        sys.stdout.write(str(Trial)+","+str(CGObject[0])+",CG,"+str(CGObject[1])+"\n")
+    # Now print the referent beliefs
+    for Referent in results[1]:
+        sys.stdout.write(str(Trial)+","+str(Referent[0])+",Referent,"+str(Referent[1])+"\n")
+    # Now print expected value over production biases.
+    for BiasType in results[2]:
+        # Compute the expected value:
+        expval = sum([BiasType[1][x]*BiasType[2][x] for x in range(len(BiasType[1]))])
+        sys.stdout.write(str(Trial)+","+str(BiasType[0])+",ProductionBias,"+str(expval)+"\n")
