@@ -18,6 +18,7 @@ class Speaker:
         """
         self.VisualWorld = VisualWorld
         self.Bias = Bias
+<<<<<<< Updated upstream
         self.rationalitynoise = rationalitynoise
 
     def GetUtteranceProbability(self, utterance, target, samples=1000):
@@ -32,6 +33,13 @@ class Speaker:
         utterances = [self.Communicate(target) for x in range(samples)]
         hits = sum([x == utterance for x in utterances])
         return hits*1.0/samples
+=======
+        # rationality noise
+        # introduces a small probability
+        # that the speaker will fail to
+        # be overly specific even when she knows that she should.
+        self.rationalitynoise = 0
+>>>>>>> Stashed changes
 
     def SampleUtterance(self, target):
         """
