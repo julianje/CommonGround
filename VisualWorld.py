@@ -44,3 +44,6 @@ class VisualWorld:
         Build a probability distribution over the objects in the visual world and return Belief object
         """
         return Belief.Belief(len(self.objects), self.GetIDs())
+
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
