@@ -1,4 +1,3 @@
-import VisualWorld
 
 
 class ReferentBelief:
@@ -6,7 +5,6 @@ class ReferentBelief:
     """
     Store a visual world with a probability distribution.
     """
-
     def __init__(self, VisualWorld):
         self.VisualWorld = VisualWorld
         self.objectcounters = [0]*len(VisualWorld.objects)

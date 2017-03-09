@@ -12,8 +12,15 @@ class Bias:
         """
         Return the bias for a given feature.
         Returns 0 bias if feature does not exist.
+        Feature is an ObjectFeature object type or a string.
         """
-        if feature.type in self.BiasType:
-            return self.BiasValue[self.BiasType.index(feature.type)]
+        if isinstance(feature, str):
+            if feature in self.BiasType:
+                return self.BiasValue[self.BiasType.index(feature)]
+            else:
+                return 0
         else:
-            return 0
+            if feature.type in self.BiasType:
+                return self.BiasValue[self.BiasType.index(feature.type)]
+            else:
+                return 0
