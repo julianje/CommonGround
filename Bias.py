@@ -24,3 +24,9 @@ class Bias:
                 return self.BiasValue[self.BiasType.index(feature.type)]
             else:
                 return 0
+
+    def __eq__(self, other):
+        """
+        check if two objects are identical
+        """
+        return self.__dict__ == other.__dict__
