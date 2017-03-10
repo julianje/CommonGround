@@ -91,7 +91,7 @@ MyListener = CL.ComplexListener(World_T1, CGPrior, BiasPriors)
 
 #T0Res = MyListener.ComputePosterior()
 MyListener.Infer(T1_Utterance)
-T1Res = MyListener.ComputePosterior()
+T1Res = MyListener.ComputePosterior(0)
 
 T2_TL = PO.PhysicalObject("square", [OF.ObjectFeature("black", "color")], "TL")
 T2_TR = PO.PhysicalObject("square", [OF.ObjectFeature("green", "color")], "TR")
@@ -104,7 +104,7 @@ MyListener.ChangeVisualWorld(World_T2)
 T2_Utterance = UT.Utterance("square", [OF.ObjectFeature("black", "color")])
 
 MyListener.Infer(T2_Utterance)
-T2Res = MyListener.ComputePosterior()
+T2Res = MyListener.ComputePosterior(1)
 
 T3_TL = PO.PhysicalObject("square", [OF.ObjectFeature("green", "color")], "TL")
 T3_TR = PO.PhysicalObject("circle", [OF.ObjectFeature("blue", "color")], "TR")
@@ -117,7 +117,7 @@ MyListener.ChangeVisualWorld(World_T3)
 T3_Utterance = UT.Utterance("circle")
 
 MyListener.Infer(T3_Utterance)
-T3Res = MyListener.ComputePosterior()
+T3Res = MyListener.ComputePosterior(2)
 
 T4_TL = PO.PhysicalObject("square", [OF.ObjectFeature("yellow", "color")], "TL")
 T4_TR = PO.PhysicalObject("triangle", [OF.ObjectFeature("blue", "color")], "TR")
@@ -130,7 +130,7 @@ MyListener.ChangeVisualWorld(World_T4)
 T4_Utterance = UT.Utterance("triangle")
 
 MyListener.Infer(T4_Utterance)
-T4Res = MyListener.ComputePosterior()
+T4Res = MyListener.ComputePosterior(3)
 
 T5_TL = PO.PhysicalObject("square", [OF.ObjectFeature("yellow", "color")], "TL")
 T5_TR = PO.PhysicalObject("rectangle", [OF.ObjectFeature("green", "color")], "TR")
@@ -143,7 +143,7 @@ MyListener.ChangeVisualWorld(World_T5)
 T5_Utterance = UT.Utterance("rectangle")
 
 MyListener.Infer(T5_Utterance)
-T5Res = MyListener.ComputePosterior()
+T5Res = MyListener.ComputePosterior(4)
 
 #SF.PrintCSV(T0Res, "0")
 SF.PrintCSV(T1Res, "1", True)

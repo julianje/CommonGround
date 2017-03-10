@@ -123,12 +123,14 @@ class ComplexListener:
                     self.HypothesisSpace.InsertHypothesis(Hypothesis.Hypothesis(VW_HypothesisSpace[
                                                           VW_index], CurrentBias, testobject, utterance, VW_Priors[VW_index], SpeakerBias_Priors[SB_index], p))
 
-    def ComputePosterior(self, update=True):
+    def ComputePosterior(self, referentNo=None, update=True):
         """
         Given the hypothesis space, compute the belief in speaker biases,
         visual access, and referent.
 
         args:
+        referentNo (int): When referent is not None, this is the referent object that gets
+            computer in the reference posterior. When is it None, the referent posterior is over all combinations of referents.
         update (bool): When set to True, the call also Updates the hypothesis space.
         """
         # First compute the belief in each target.
@@ -141,5 +143,5 @@ class ComplexListener:
             self.HypothesisSpace.MoveForward()
         VWResult = self.HypothesisSpace.ComputeVWPosterior()
         SBResult = self.HypothesisSpace.ComputeBiasPosterior()
-        RefResult = self.HypothesisSpace.ComputeReferentPosterior()
+        RefResult = self.HypothesisSpace.ComputeReferentPosterior(referentNo)
         return [VWResult, SBResult, RefResult]
