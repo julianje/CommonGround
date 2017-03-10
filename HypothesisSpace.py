@@ -117,7 +117,8 @@ class HypothesisSpace:
             for HypothesisIndex in range(len(Biases)):
                 p += Biases[HypothesisIndex][BiasIndex] * \
                     Beliefs[HypothesisIndex]
-            ExpVals.append([BiasTypes[BiasIndex], p])
+            ExpVals.append(
+                [BiasTypes[BiasIndex], p])
         return ExpVals
 
     def ComputeReferentPosterior(self, ReferentNo=None):
