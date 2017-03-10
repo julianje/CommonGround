@@ -89,13 +89,11 @@ def PrintCSV(results, Trial=None, header=True):
     if header:
         sys.stdout.write("Trial,Variable,Type,Value\n")
     # Now start with common ground inferences:
-    for CGObject in results[0]:
-        sys.stdout.write(str(Trial)+","+str(CGObject[0])+",CG,"+str(CGObject[1])+"\n")
+    for i in range(len(results[0][0])):
+        sys.stdout.write(str(Trial)+","+str(results[0][0][i])+",CG,"+str(results[0][1][i])+"\n")
     # Now print the referent beliefs
     for Referent in results[1]:
-        sys.stdout.write(str(Trial)+","+str(Referent[0])+",Referent,"+str(Referent[1])+"\n")
+        sys.stdout.write(str(Trial)+","+str(Referent[0])+",ProductionBias,"+str(Referent[1])+"\n")
     # Now print expected value over production biases.
-    for BiasType in results[2]:
-        # Compute the expected value:
-        expval = sum([BiasType[1][x]*BiasType[2][x] for x in range(len(BiasType[1]))])
-        sys.stdout.write(str(Trial)+","+str(BiasType[0])+",ProductionBias,"+str(expval)+"\n")
+    for i in range(len(results[2][0])):
+        sys.stdout.write(str(Trial)+","+str(results[2][0][i])+",Referent,"+str(results[2][1][i])+"\n")
