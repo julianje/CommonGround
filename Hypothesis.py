@@ -21,7 +21,7 @@ class Hypothesis:
         """
         self.VisualWorldIDs = VisualWorld.GetIDs()
         self.SpeakerBiases = SpeakerBiases
-        self.ReferentID = Referent.Id
+        self.ReferentID = [Referent.Id]
         self.VWprior = VWprior
         self.SBprior = SBprior
         self.Utterances = [Utterance]
@@ -49,11 +49,12 @@ class Hypothesis:
         # This is the same as GetVWPosterior, but its meaning is different.
         return sum([self.VWprior*self.SBprior*x for x in self.Likelihood])
 
-    def AddTrial(self, utterance, likelihood):
+    def AddTrial(self, referent, utterance, likelihood):
         """
         Integrate a new likelihood into the current likelihood
         and save the new utterance.
         """
+        self.ReferentID.append(referent)
         self.Utterances.append(utterance)
         self.Likelihood.append(likelihood)
 
