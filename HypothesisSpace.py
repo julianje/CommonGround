@@ -135,7 +135,22 @@ class HypothesisSpace:
                     np.prod(hypothesis.Likelihood)*hypothesis.SBprior*hypothesis.VWprior)
             else:
                 index = Referents.index(hypothesis.ReferentID)
-                Beliefs[index] += np.prod(hypothesis.Likelihood)*hypothesis.SBprior*hypothesis.VWprior
+                Beliefs[
+                    index] += np.prod(hypothesis.Likelihood)*hypothesis.SBprior*hypothesis.VWprior
         Norm = sum(Beliefs)
         Beliefs = [x/Norm for x in Beliefs]
-        return [Referents, Beliefs]
+        if ReferentNo is None:
+            return [Referents, Beliefs]
+        else:
+                # If you want a specific referent, then rebuild a simplified
+                # hypothesis space.
+            SimpleReferents = []
+            SimpleBeliefs = []
+            for index in range(len(Beliefs)):
+                if Referents[index][ReferentNo] not in SimpleReferents:
+                    SimpleReferents.append(Referents[index][ReferentNo])
+                    SimpleBeliefs.append(Beliefs[index])
+                else:
+                    SimpleBeliefs[
+                        SimpleReferents.index(Referents[index][ReferentNo])] += Beliefs[index]
+            return [SimpleReferents, SimpleBeliefs]
