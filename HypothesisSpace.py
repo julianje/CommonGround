@@ -120,14 +120,22 @@ class HypothesisSpace:
             ExpVals.append([BiasTypes[BiasIndex], p])
         return ExpVals
 
-    def ComputeReferentPosterior(self, Refs):
+    def ComputeReferentPosterior(self, ReferentNo=None):
         """
         Compute the posterior over referent vectors.
         Args:
-        Refs (list of referent IDs)
+        ReferentNo (list of referent. When set to None inferences is over full vectors)
         """
-        # The hypothesis space consists of all vectors of referents.
-
-        # for Referent in Refs:
-        # Extract hypotheses that matter
-        #    relevant = self.PullRefs(Referent)
+        Referents = []
+        Beliefs = []
+        for hypothesis in self.hypotheses:
+            if hypothesis.ReferentID not in Referents:
+                Referents.append(hypothesis.ReferentID)
+                Beliefs.append(
+                    np.prod(hypothesis.Likelihood)*hypothesis.SBprior*hypothesis.VWprior)
+            else:
+                index = Referents.index(hypothesis.ReferentID)
+                Beliefs[index] += np.prod(hypothesis.Likelihood)*hypothesis.SBprior*hypothesis.VWprior
+        Norm = sum(Beliefs)
+        Beliefs = [x/Norm for x in Beliefs]
+        return [Referents, Beliefs]

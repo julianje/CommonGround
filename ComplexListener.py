@@ -141,4 +141,5 @@ class ComplexListener:
             self.HypothesisSpace.MoveForward()
         VWResult = self.HypothesisSpace.ComputeVWPosterior()
         SBResult = self.HypothesisSpace.ComputeBiasPosterior()
-        return [VWResult, SBResult]
+        RefResult = self.HypothesisSpace.ComputeReferentPosterior()
+        return [VWResult, SBResult, RefResult]
