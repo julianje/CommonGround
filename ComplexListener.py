@@ -139,5 +139,6 @@ class ComplexListener:
         # Uses next hypothesis space as current one.
         if update:
             self.HypothesisSpace.MoveForward()
-        result = self.HypothesisSpace.ComputeVWPosterior()
-        return result
+        VWResult = self.HypothesisSpace.ComputeVWPosterior()
+        SBResult = self.HypothesisSpace.ComputeBiasPosterior()
+        return [VWResult, SBResult]

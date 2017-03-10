@@ -97,7 +97,28 @@ class HypothesisSpace:
         Biases = []
         Beliefs = []
         for hypothesis in self.hypotheses:
-        	if hypothesis.
+            if hypothesis.SpeakerBiases.BiasValue not in Biases:
+                Biases.append(hypothesis.SpeakerBiases.BiasValue)
+                Beliefs.append(
+                    np.prod(hypothesis.Likelihood)*hypothesis.SBprior*hypothesis.VWprior)
+            else:
+                index = Biases.index(hypothesis.SpeakerBiases.BiasValue)
+                Beliefs[
+                    index] += np.prod(hypothesis.Likelihood)*hypothesis.SBprior*hypothesis.VWprior
+        Norm = sum(Beliefs)
+        Beliefs = [x/Norm for x in Beliefs]
+        # Now compute the expected value.
+        ExpVals = []
+        # All hypotheses have the same dimensions over the number of speaker
+        # biases the agent could have, so just take any.
+        BiasTypes = self.hypotheses[0].SpeakerBiases.BiasType
+        for BiasIndex in range(len(BiasTypes)):
+            p = 0
+            for HypothesisIndex in range(len(Biases)):
+                p += Biases[HypothesisIndex][BiasIndex] * \
+                    Beliefs[HypothesisIndex]
+            ExpVals.append([BiasTypes[BiasIndex], p])
+        return ExpVals
 
     def ComputeReferentPosterior(self, Refs):
         """
@@ -110,40 +131,3 @@ class HypothesisSpace:
         # for Referent in Refs:
         # Extract hypotheses that matter
         #    relevant = self.PullRefs(Referent)
-
-    def PullRefs(self, Referent):
-        """
-        Retrieve all hypotheses that have the target referent,
-        split by
-        Referent (target referent ID)
-        """
-        Returnset = []
-        for hypothesis in self.hypotheses:
-            if hypothesis.ReferentID == Referent:
-                Returnset.append(hypothesis)
-        return Returnset
-
-    def PullVW(self, VW):
-        """
-        Retrieve all hypotheses with a given visual world, split by speaker bias objects.
-        VW (List of object names; should be retrieved from VisualWorld.GetIDs())
-        """
-        Returnset = []
-        for hypothesis in self.hypotheses:
-            if hypothesis.VisualWorldIDs == VW:
-                Returnset.append(hypothesis)
-        # Now split Returnset based on the SpeakerBiases.
-        # First create the space of speaker biases in the return set.
-        SpeakerBiasSet = []
-        for hypothesis in Returnset:
-            if hypothesis.SpeakerBiases not in SpeakerBiasSet:
-                SpeakerBiasSet.append(hypothesis.SpeakerBiases)
-        # Now create the final return set.
-        FinalReturnSet = []
-        for SpeakerBias in SpeakerBiasSet:
-            Hypothesissubset = []
-            for hypothesis in Returnset:
-                if hypothesis.SpeakerBiases == SpeakerBias:
-                    Hypothesissubset.append(hypothesis)
-            FinalReturnSet.append(Hypothesissubset)
-        return FinalReturnSet
