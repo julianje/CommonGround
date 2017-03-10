@@ -75,7 +75,11 @@ import Utterance as UT
 import Bias
 import Belief as BF
 import Speaker
+import Filter
 import SupportingFunctions as SF
+
+# Build a filter for the hypothesis space
+MyFilter = Filter.Filter(3)  # Common ground must have three objects.
 
 T1_TL = PO.PhysicalObject("circle", [OF.ObjectFeature("red", "color")], "TL")
 T1_TR = PO.PhysicalObject("triangle", [OF.ObjectFeature("green", "color")], "TR")
@@ -87,7 +91,7 @@ CGPrior = BF.Belief(4, [T1_TL.Id, T1_TR.Id, T1_BL.Id, T1_BR.Id], [0.5, 0.5, 0.5,
 BiasPriors = [SF.BuildBeta(5, 3, "color", 0.5)]
 T1_Utterance = UT.Utterance("triangle")
 
-MyListener = CL.ComplexListener(World_T1, CGPrior, BiasPriors)
+MyListener = CL.ComplexListener(World_T1, CGPrior, BiasPriors, MyFilter)
 
 #T0Res = MyListener.ComputePosterior()
 MyListener.Infer(T1_Utterance)
@@ -151,3 +155,4 @@ SF.PrintCSV(T2Res, "2", False)
 SF.PrintCSV(T3Res, "3", False)
 SF.PrintCSV(T4Res, "4", False)
 SF.PrintCSV(T5Res, "5", False)
+

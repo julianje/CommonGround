@@ -8,7 +8,7 @@ import scipy.stats as st
 import sys
 
 
-def BuildVWHypSpace(VisualWorld, CGprior):
+def BuildVWHypSpace(VisualWorld, CGprior, Filter=None):
     """
     Build a hypothesis space of visualworlds
     (by building all non-empty subsets of the listeners visual world; including the full set)
@@ -17,6 +17,8 @@ def BuildVWHypSpace(VisualWorld, CGprior):
     Args:
     VisualWorld: Object of type VisualWorld.
     CGprior: Object of class belief. Each entry in the belief object is a prior over a visual world.
+    Filter: Object of class Filter. When different from none, hypothesis generator
+    reduces the hypothesis filter using the Filter.Check() method.
     """
     # Build the first entry:
     size = CGprior.HypothesisSize
@@ -46,7 +48,10 @@ def BuildVWHypSpace(VisualWorld, CGprior):
     # Now use the SubsetIndex to build a set of visual worlds.
     VWHypothesisSpace = [VW.VisualWorld(
         list(compress(VisualWorld.objects, Indices))) for Indices in SubsetIndex]
-    return [VWHypothesisSpace, SubsetPriors]
+    if Filter is None:
+        return [VWHypothesisSpace, SubsetPriors]
+    else:
+        return Filter.Check(VWHypothesisSpace, SubsetPriors)
 
 
 def BuildBiasHypSpace(BiasPriors):
@@ -90,10 +95,13 @@ def PrintCSV(results, Trial=None, header=True):
         sys.stdout.write("Trial,Variable,Type,Value\n")
     # Now start with common ground inferences:
     for i in range(len(results[0][0])):
-        sys.stdout.write(str(Trial)+","+str(results[0][0][i])+",CG,"+str(results[0][1][i])+"\n")
+        sys.stdout.write(
+            str(Trial)+","+str(results[0][0][i])+",CG,"+str(results[0][1][i])+"\n")
     # Now print the referent beliefs
     for Referent in results[1]:
-        sys.stdout.write(str(Trial)+","+str(Referent[0])+",ProductionBias,"+str(Referent[1])+"\n")
+        sys.stdout.write(
+            str(Trial)+","+str(Referent[0])+",ProductionBias,"+str(Referent[1])+"\n")
     # Now print expected value over production biases.
     for i in range(len(results[2][0])):
-        sys.stdout.write(str(Trial)+","+str(results[2][0][i])+",Referent,"+str(results[2][1][i])+"\n")
+        sys.stdout.write(
+            str(Trial)+","+str(results[2][0][i])+",Referent,"+str(results[2][1][i])+"\n")

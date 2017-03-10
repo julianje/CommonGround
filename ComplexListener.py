@@ -9,7 +9,7 @@ import HypothesisSpace as HS
 
 class ComplexListener:
 
-    def __init__(self, VisualWorld, CommonGroundPrior, BiasPriors):
+    def __init__(self, VisualWorld, CommonGroundPrior, BiasPriors, Filter=None):
         """
         VisualWorld is a VisualWorld object.
         CommonGroundPrior is a belief object.
@@ -20,6 +20,7 @@ class ComplexListener:
         VisualWorld: Object of class VisualWorld
         CommonGroundPrior: Object of class Belief
         BiasPriors: List of objects of type belief
+        Filter: Object of type filter. Filter.Check() is used to apply logical constraints to visual world hypothesis space.
         """
         self.VisualWorld = VisualWorld
         self.CommonGroundPrior = CommonGroundPrior
@@ -29,6 +30,7 @@ class ComplexListener:
         if CommonGroundPrior.values != [obj.Id for obj in VisualWorld.objects]:
             print "ERROR: CommonGround prior object doesn't match the VisualWorld objects. Perhaps you used PhysicalObject.name instead of PhysicalObject.Id in the common ground prior constructor? Is the order in the visual world different from the order in the common ground priors?"
         self.BiasPriors = BiasPriors
+        self.Filter = Filter
         self.HypothesisSpace = HS.HypothesisSpace()
 
     def ChangeVisualWorld(self, NewVisualWorld):
@@ -66,7 +68,7 @@ class ComplexListener:
         Take an existing hypothesis space and compute the posterior
         """
         [VW_HypothesisSpace, VW_Priors] = SF.BuildVWHypSpace(
-            self.VisualWorld, self.CommonGroundPrior)
+            self.VisualWorld, self.CommonGroundPrior, self.Filter)
         [SpeakerBias_HypothesisSpace, SpeakerBias_Priors] = SF.BuildBiasHypSpace(
             self.BiasPriors)
         BiasNames = [x.name for x in self.BiasPriors]
@@ -93,7 +95,7 @@ class ComplexListener:
         # Build space of possible visual worlds
         #sys.stdout.write("Building visual world space.\n")
         [VW_HypothesisSpace, VW_Priors] = SF.BuildVWHypSpace(
-            self.VisualWorld, self.CommonGroundPrior)
+            self.VisualWorld, self.CommonGroundPrior, self.Filter)
         # Now build hypothesis spaces over speaker biases.
         #sys.stdout.write("Building speaker bias space.\n")
         [SpeakerBias_HypothesisSpace, SpeakerBias_Priors] = SF.BuildBiasHypSpace(
@@ -133,12 +135,6 @@ class ComplexListener:
             computer in the reference posterior. When is it None, the referent posterior is over all combinations of referents.
         update (bool): When set to True, the call also Updates the hypothesis space.
         """
-        # First compute the belief in each target.
-        # Kind of inefficient, but works.
-        # Build a normalizing vector
-        #[VW_HypothesisSpace, VW_Priors] = SF.BuildVWHypSpace(
-        #    self.VisualWorld, self.CommonGroundPrior)
-        # Uses next hypothesis space as current one.
         if update:
             self.HypothesisSpace.MoveForward()
         VWResult = self.HypothesisSpace.ComputeVWPosterior()
