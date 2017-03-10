@@ -80,22 +80,10 @@ class ComplexListener:
                 for testobject in TestSpeaker.VisualWorld.objects:
                     p = TestSpeaker.GetUtteranceProbability(
                         utterance, testobject, samples)
-                    self.HypothesisSpace.AddTrial(index, utterance, p)
+                    self.HypothesisSpace.Grow(
+                        VW_HypothesisSpace[VW_index].GetIDs(), CurrentBias, testobject.Id, utterance, p)
+                    #self.HypothesisSpace.AddTrial(index, utterance, p)
                     index += 1
-        # for HypothesisIndex in range(len(self.HypothesisSpace)):
-        #    CurrentHypothesis = self.HypothesisSpace[HypothesisIndex]
-        #    VW = CurrentHypothesis[0]  # Used
-        #    SB = CurrentHypothesis[1]  # Used
-        #    Ref = CurrentHypothesis[2]  # Used
-        #    past_likelihood = CurrentHypothesis[5]
-        #    if past_likelihood > 0:
-        #        # build the model using the hypothesis
-        #        BiasNames = [x.name for x in self.BiasPriors]
-        #        CurrentBias = Bias.Bias(BiasNames, SB)
-        #        TestSpeaker = Speaker.Speaker(VW, CurrentBias)
-        #        p = TestSpeaker.GetUtteranceProbability(utterance, Ref, samples)
-        #        sys.stdout.write(str(past_likelihood)+"*"+str(p)+" ("+str(CurrentHypothesis[2].Id)+")\n")
-        #        self.HypothesisSpace[HypothesisIndex][5] = past_likelihood*p
 
     def Infer_New(self, utterance, samples=1000):
         """
@@ -132,20 +120,24 @@ class ComplexListener:
                     # sys.stdout.write(".")
                     p = TestSpeaker.GetUtteranceProbability(
                         utterance, testobject, samples)
-                    self.HypothesisSpace.InsertHypothesis(Hypothesis.Hypothesis(VW_HypothesisSpace[VW_index], CurrentBias, testobject, utterance, VW_Priors[VW_index], SpeakerBias_Priors[SB_index], p))
+                    self.HypothesisSpace.InsertHypothesis(Hypothesis.Hypothesis(VW_HypothesisSpace[
+                                                          VW_index], CurrentBias, testobject, utterance, VW_Priors[VW_index], SpeakerBias_Priors[SB_index], p))
 
-    def ComputePosterior(self, update=False):
+    def ComputePosterior(self, update=True):
         """
         Given the hypothesis space, compute the belief in speaker biases,
         visual access, and referent.
 
         args:
-        update (bool): When set to True, the call also Updates the object's
-        posterior about what is common ground, and about the speaker's production biases.
+        update (bool): When set to True, the call also Updates the hypothesis space.
         """
         # First compute the belief in each target.
         # Kind of inefficient, but works.
         # Build a normalizing vector
-        [VW_HypothesisSpace, VW_Priors] = SF.BuildVWHypSpace(
-            self.VisualWorld, self.CommonGroundPrior)
-        return self.HypothesisSpace.ComputeVWPosterior(VW_HypothesisSpace)
+        #[VW_HypothesisSpace, VW_Priors] = SF.BuildVWHypSpace(
+        #    self.VisualWorld, self.CommonGroundPrior)
+        # Uses next hypothesis space as current one.
+        if update:
+            self.HypothesisSpace.MoveForward()
+        result = self.HypothesisSpace.ComputeVWPosterior()
+        return result
