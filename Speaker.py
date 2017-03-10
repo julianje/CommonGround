@@ -76,3 +76,9 @@ class Speaker:
             Utterance = self.SampleUtterance(target)
             InferredBelief = ImaginedListener.InferReferent(Utterance)
         return Utterance
+
+    def __eq__(self, other):
+        """
+        check if two objects are identical
+        """
+        return self.__dict__ == other.__dict__

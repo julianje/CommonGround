@@ -1,9 +1,10 @@
 import copy
 import Speaker
 import sys
-import ReferentBelief
 import Bias
 import SupportingFunctions as SF
+import Hypothesis
+import HypothesisSpace as HS
 
 
 class ComplexListener:
@@ -28,7 +29,7 @@ class ComplexListener:
         if CommonGroundPrior.values != [obj.Id for obj in VisualWorld.objects]:
             print "ERROR: CommonGround prior object doesn't match the VisualWorld objects. Perhaps you used PhysicalObject.name instead of PhysicalObject.Id in the common ground prior constructor? Is the order in the visual world different from the order in the common ground priors?"
         self.BiasPriors = BiasPriors
-        self.HypothesisSpace = []
+        self.HypothesisSpace = HS.HypothesisSpace()
 
     def ChangeVisualWorld(self, NewVisualWorld):
         """
@@ -57,7 +58,37 @@ class ComplexListener:
         List of lists. Each sublist contains:
         [VisualWorld object, Speaker bias vector, testedobject (PhysicalObject), visual world prior, speaker bias prior, likelihood.]
         """
-        self.HypothesisSpace = []
+        return self.Infer_New(utterance, samples) if self.HypothesisSpace.isEmpty() else self.Infer_Repeat(utterance, samples)
+        # return self.Infer_New(utterance, samples)
+
+    def Infer_Repeat(self, utterance, samples=1000):
+        """
+        Take an existing hypothesis space and compute the posterior
+        """
+        [VW_HypothesisSpace, VW_Priors] = SF.BuildVWHypSpace(
+            self.VisualWorld, self.CommonGroundPrior)
+        [SpeakerBias_HypothesisSpace, SpeakerBias_Priors] = SF.BuildBiasHypSpace(
+            self.BiasPriors)
+        BiasNames = [x.name for x in self.BiasPriors]
+        index = 0
+        for SB_index in range(len(SpeakerBias_Priors)):
+            CurrentBias = Bias.Bias(
+                BiasNames, SpeakerBias_HypothesisSpace[SB_index])
+            for VW_index in range(len(VW_Priors)):
+                TestSpeaker = Speaker.Speaker(
+                    VW_HypothesisSpace[VW_index], CurrentBias)
+                for testobject in TestSpeaker.VisualWorld.objects:
+                    p = TestSpeaker.GetUtteranceProbability(
+                        utterance, testobject, samples)
+                    self.HypothesisSpace.Grow(
+                        VW_HypothesisSpace[VW_index].GetIDs(), CurrentBias, testobject.Id, utterance, p)
+                    #self.HypothesisSpace.AddTrial(index, utterance, p)
+                    index += 1
+
+    def Infer_New(self, utterance, samples=1000):
+        """
+        Build a hypothesis space and compute the posterior
+        """
         # Each speaker object needs a visual world, and a bias object.
         # Build space of possible visual worlds
         #sys.stdout.write("Building visual world space.\n")
@@ -89,8 +120,8 @@ class ComplexListener:
                     # sys.stdout.write(".")
                     p = TestSpeaker.GetUtteranceProbability(
                         utterance, testobject, samples)
-                    self.HypothesisSpace.append([VW_HypothesisSpace[VW_index], SpeakerBias_HypothesisSpace[
-                                                SB_index], testobject, VW_Priors[VW_index], SpeakerBias_Priors[SB_index], p])
+                    self.HypothesisSpace.InsertHypothesis(Hypothesis.Hypothesis(VW_HypothesisSpace[
+                                                          VW_index], CurrentBias, testobject, utterance, VW_Priors[VW_index], SpeakerBias_Priors[SB_index], p))
 
     def ComputePosterior(self, update=True):
         """
@@ -98,62 +129,17 @@ class ComplexListener:
         visual access, and referent.
 
         args:
-        update (bool): When set to True, the call also Updates the object's
-        posterior about what is common ground, and about the speaker's production biases.
+        update (bool): When set to True, the call also Updates the hypothesis space.
         """
         # First compute the belief in each target.
         # Kind of inefficient, but works.
         # Build a normalizing vector
-        Posteriors = [x[3]*x[4]*x[5] for x in self.HypothesisSpace]
-        Norm = sum(Posteriors)
-        Posteriors = [x*1.0/Norm for x in Posteriors]
-        CGBeliefs = []
-        for cgobject in self.VisualWorld.objects:
-            p = 0
-            for HypothesisIndex in range(len(self.HypothesisSpace)):
-                if self.HypothesisSpace[HypothesisIndex][0].Contains(cgobject):
-                    p += Posteriors[HypothesisIndex]
-            CGBeliefs.append([cgobject.Id, p])
-        # Next compute the belief in each referent
-        ReferentBeliefs = []
-        for refobject in self.VisualWorld.objects:
-            p = 0
-            for HypothesisIndex in range(len(self.HypothesisSpace)):
-                if self.HypothesisSpace[HypothesisIndex][2] == refobject:
-                    p += Posteriors[HypothesisIndex]
-            ReferentBeliefs.append([refobject.Id, p])
-        # Next compute the posterior of each bias.
-        BiasPosteriors = []
-        # For each source of bias
-        for i in range(len(self.BiasPriors)):
-            # Iterate over each value
-            Name = self.BiasPriors[i].name
-            Domain = self.BiasPriors[i].values
-            probs = []
-            for DomainIndex in range(len(Domain)):
-                CurrDomain = Domain[DomainIndex]
-                p = 0
-                for HypIndex in range(len(self.HypothesisSpace)):
-                    if self.HypothesisSpace[HypIndex][1][i] == CurrDomain:
-                        p += Posteriors[HypIndex]
-                probs.append(p)
-            BiasPosteriors.append([Name, Domain, probs])
-        # Check if we need to update representations
+        #[VW_HypothesisSpace, VW_Priors] = SF.BuildVWHypSpace(
+        #    self.VisualWorld, self.CommonGroundPrior)
+        # Uses next hypothesis space as current one.
         if update:
-            # Update speaker biases.
-            for BiasIndex in range(len(BiasPosteriors)):
-                BiasUpdate = BiasPosteriors[BiasIndex]
-                # BiasUpdate is a list where
-                # BiasUpdate[0] is a string with the Id
-                # BiasUpdate[1] is the domain and
-                # BiasUpdate[2] is the posterior.
-                # Check that the updater has the same name
-                if BiasUpdate[0] != self.BiasPriors[BiasIndex].name:
-                    print "WARNING: Bias names do not match. You probably have an error in the model specification."
-                self.BiasPriors[BiasIndex].probs = BiasUpdate[2]
-            # Update common ground beliefs.
-            for ObjectCGIndex in range(len(CGBeliefs)):
-                if self.CommonGroundPrior.values[ObjectCGIndex] != CGBeliefs[ObjectCGIndex][0]:
-                    print "WARNING: Commong ground prior names do not match. You probably have an error in your model specification."
-                self.CommonGroundPrior.probs[ObjectCGIndex] = CGBeliefs[ObjectCGIndex][1]
-        return [CGBeliefs, ReferentBeliefs, BiasPosteriors]
+            self.HypothesisSpace.MoveForward()
+        VWResult = self.HypothesisSpace.ComputeVWPosterior()
+        SBResult = self.HypothesisSpace.ComputeBiasPosterior()
+        RefResult = self.HypothesisSpace.ComputeReferentPosterior()
+        return [VWResult, SBResult, RefResult]
