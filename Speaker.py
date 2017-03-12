@@ -5,7 +5,7 @@ import Utterance
 
 class Speaker:
 
-    def __init__(self, VisualWorld, Bias, rationalitynoise=0.1):
+    def __init__(self, VisualWorld, Bias, rationalitynoise=0):
         """
         Create a new speaker with a visual world, a set of biases, and some rationality noise.
 
@@ -62,13 +62,13 @@ class Speaker:
         # Try the simplest utterance first but with
         # a baseline bias for producing a more complex utterance.
         Utterance = self.SampleUtterance(target)
+        if random.random() < self.rationalitynoise:
+            return Utterance
         InferredBelief = ImaginedListener.InferReferent(Utterance)
         # Loop here until you find a suitable utterance
         while(not InferredBelief.Certain()):
             Utterance = self.SampleUtterance(target)
             InferredBelief = ImaginedListener.InferReferent(Utterance)
-            if random.random() < self.rationalitynoise:
-                return Utterance
         return Utterance
 
     def __eq__(self, other):
