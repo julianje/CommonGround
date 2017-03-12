@@ -67,6 +67,8 @@ class Speaker:
         while(not InferredBelief.Certain()):
             Utterance = self.SampleUtterance(target)
             InferredBelief = ImaginedListener.InferReferent(Utterance)
+            if random.random() < self.rationalitynoise:
+                return Utterance
         return Utterance
 
     def __eq__(self, other):
