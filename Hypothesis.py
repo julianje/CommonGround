@@ -26,6 +26,7 @@ class Hypothesis:
         self.SBprior = SBprior
         self.Utterances = [Utterance]
         self.Likelihood = [Likelihood]
+        self.ReferentPrior = 1/len(self.VisualWorldIDs)
 
     def GetVWPosterior(self):
         """
@@ -34,20 +35,20 @@ class Hypothesis:
         actual posterior is obtained by adding all the hypotheses with the same visual world,
         integrating over possible referents.
         """
-        return sum([self.VWprior*self.SBprior*x for x in self.Likelihood])
+        return sum([self.ReferentPrior*self.VWprior*self.SBprior*x for x in self.Likelihood])
 
     def GetReferentPosterior(self):
         """
         Return the posterior of the referent using the last utterance.
         """
-        return (self.VWprior*self.SBprior*self.Likelihood[-1])
+        return (self.ReferentPrior*self.VWprior*self.SBprior*self.Likelihood[-1])
 
     def GetBiasPosterior(self):
         """
         Return posterior of the bias value.
         """
         # This is the same as GetVWPosterior, but its meaning is different.
-        return sum([self.VWprior*self.SBprior*x for x in self.Likelihood])
+        return sum([self.ReferentPrior*self.VWprior*self.SBprior*x for x in self.Likelihood])
 
     def AddTrial(self, referent, utterance, likelihood):
         """
