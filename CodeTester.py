@@ -79,7 +79,7 @@ import Filter
 import SupportingFunctions as SF
 
 # Build a filter for the hypothesis space
-MyFilter = Filter.Filter(3)  # Common ground must have three objects.
+MyFilter = Filter.Filter(3, 3)  # Common ground must have three objects.
 
 T1_TL = PO.PhysicalObject("circle", [OF.ObjectFeature("red", "color")], "TL")
 T1_TR = PO.PhysicalObject("triangle", [OF.ObjectFeature("green", "color")], "TR")
