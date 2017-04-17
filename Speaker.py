@@ -5,7 +5,7 @@ import Utterance
 
 class Speaker:
 
-    def __init__(self, VisualWorld, Bias, rationalitynoise=0):
+    def __init__(self, VisualWorld, Bias, rationalitynoise=0.1):
         """
         Create a new speaker with a visual world, a set of biases, and some rationality noise.
 

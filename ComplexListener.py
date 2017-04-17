@@ -9,7 +9,7 @@ import HypothesisSpace as HS
 
 class ComplexListener:
 
-    def __init__(self, VisualWorld, CommonGroundPrior, BiasPriors, Filter=None):
+    def __init__(self, VisualWorld, CommonGroundPrior, BiasPriors, Filter=None, SpeakerRationalityNoise=0.1):
         """
         VisualWorld is a VisualWorld object.
         CommonGroundPrior is a belief object.
@@ -21,6 +21,7 @@ class ComplexListener:
         CommonGroundPrior: Object of class Belief
         BiasPriors: List of objects of type belief
         Filter: Object of type filter. Filter.Check() is used to apply logical constraints to visual world hypothesis space.
+        SpeakerRationalityNoise: Listener's belief in the probability that the speaker will be accidentally underinformative (e.g. saying "circle" when there are two circles).
         """
         self.VisualWorld = VisualWorld
         self.CommonGroundPrior = CommonGroundPrior
@@ -31,6 +32,7 @@ class ComplexListener:
             print "ERROR: CommonGround prior object doesn't match the VisualWorld objects. Perhaps you used PhysicalObject.name instead of PhysicalObject.Id in the common ground prior constructor? Is the order in the visual world different from the order in the common ground priors?"
         self.BiasPriors = BiasPriors
         self.Filter = Filter
+        self.SpeakerRationalityNoise = SpeakerRationalityNoise
         self.HypothesisSpace = HS.HypothesisSpace()
 
     def ChangeVisualWorld(self, NewVisualWorld):
@@ -78,7 +80,7 @@ class ComplexListener:
                 BiasNames, SpeakerBias_HypothesisSpace[SB_index])
             for VW_index in range(len(VW_Priors)):
                 TestSpeaker = Speaker.Speaker(
-                    VW_HypothesisSpace[VW_index], CurrentBias)
+                    VW_HypothesisSpace[VW_index], CurrentBias, self.SpeakerRationalityNoise)
                 for testobject in TestSpeaker.VisualWorld.objects:
                     p = TestSpeaker.GetUtteranceProbability(
                         utterance, testobject, samples)
@@ -114,7 +116,7 @@ class ComplexListener:
                 # First build the speaker object.
                 #sys.stdout.write("\tbuilding speaker object.\n")
                 TestSpeaker = Speaker.Speaker(
-                    VW_HypothesisSpace[VW_index], CurrentBias)
+                    VW_HypothesisSpace[VW_index], CurrentBias, self.SpeakerRationalityNoise)
                 # Now iterate over the space of referents and get
                 # the probability of producing the utterance.
                 #sys.stdout.write("\t\titerating over referents.\n")
