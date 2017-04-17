@@ -24,7 +24,8 @@ T6_Utterance = UT.Utterance("rectangle")
 # General parameters
 # Build a filter for the hypothesis space
 MyFilter = Filter.Filter(3, 3)  # Common ground must have three objects (one object is not seen).
-BiasPriors = [SF.BuildBeta(0.55, 0.82, "color")]  # Parameters estimated from participant data.
+BiasPriors = [SF.BuildBeta(0.39, 0.32, "color")]  # Parameters estimated from participant data.
+SpeakerRationalityNoise = 0.055  # Fit from participant data.
 
 
 T1_TL = PO.PhysicalObject("rectangle", [OF.ObjectFeature("yellow", "color")], "TL")
@@ -33,7 +34,7 @@ T1_BL = PO.PhysicalObject("triangle", [OF.ObjectFeature("blue", "color")], "BL")
 T1_BR = PO.PhysicalObject("circle", [OF.ObjectFeature("red", "color")], "BR")
 CGPrior = BF.Belief(4, [T1_TL.Id, T1_TR.Id, T1_BL.Id, T1_BR.Id], [0.5, 0.5, 0.5, 0.5])  # Priors from common ground
 World_T1 = VW.VisualWorld([T1_TL, T1_TR, T1_BL, T1_BR])
-MyListener = CL.ComplexListener(World_T1, CGPrior, BiasPriors, MyFilter)
+MyListener = CL.ComplexListener(World_T1, CGPrior, BiasPriors, MyFilter, SpeakerRationalityNoise)
 MyListener.Infer(T1_Utterance)
 T1Res = MyListener.ComputePosterior(0)
 
@@ -101,19 +102,13 @@ T4_Utterance = UT.Utterance("star")
 T5_Utterance = UT.Utterance("circle", [OF.ObjectFeature("yellow", "color")])
 T6_Utterance = UT.Utterance("rectangle")
 
-
-# General parameters
-# Build a filter for the hypothesis space
-MyFilter = Filter.Filter(3, 3)  # Common ground must have three objects (one object is not seen).
-BiasPriors = [SF.BuildBeta(0.55, 0.82, "color")]  # Parameters estimated from participant data.
-
 T1_TL = PO.PhysicalObject("rectangle", [OF.ObjectFeature("yellow", "color")], "TL")
 T1_TR = PO.PhysicalObject("triangle", [OF.ObjectFeature("green", "color")], "TR")
 T1_BL = PO.PhysicalObject("triangle", [OF.ObjectFeature("blue", "color")], "BL")
 T1_BR = PO.PhysicalObject("circle", [OF.ObjectFeature("red", "color")], "BR")
 CGPrior = BF.Belief(4, [T1_TL.Id, T1_TR.Id, T1_BL.Id, T1_BR.Id], [0.5, 0.5, 0.5, 0.5])  # Priors from common ground
 World_T1 = VW.VisualWorld([T1_TL, T1_TR, T1_BL, T1_BR])
-MyListener = CL.ComplexListener(World_T1, CGPrior, BiasPriors, MyFilter)
+MyListener = CL.ComplexListener(World_T1, CGPrior, BiasPriors, MyFilter, SpeakerRationalityNoise)
 MyListener.Infer(T1_Utterance)
 T1Res = MyListener.ComputePosterior(0)
 
@@ -181,18 +176,13 @@ T4_Utterance = UT.Utterance("star", [OF.ObjectFeature("blue", "color")])
 T5_Utterance = UT.Utterance("circle", [OF.ObjectFeature("yellow", "color")])
 T6_Utterance = UT.Utterance("rectangle")
 
-# General parameters
-# Build a filter for the hypothesis space
-MyFilter = Filter.Filter(3, 3)  # Common ground must have three objects (one object is not seen).
-BiasPriors = [SF.BuildBeta(0.55, 0.82, "color")]  # Parameters estimated from participant data.
-
 T1_TL = PO.PhysicalObject("rectangle", [OF.ObjectFeature("yellow", "color")], "TL")
 T1_TR = PO.PhysicalObject("triangle", [OF.ObjectFeature("green", "color")], "TR")
 T1_BL = PO.PhysicalObject("triangle", [OF.ObjectFeature("blue", "color")], "BL")
 T1_BR = PO.PhysicalObject("circle", [OF.ObjectFeature("red", "color")], "BR")
 CGPrior = BF.Belief(4, [T1_TL.Id, T1_TR.Id, T1_BL.Id, T1_BR.Id], [0.5, 0.5, 0.5, 0.5])  # Priors from common ground
 World_T1 = VW.VisualWorld([T1_TL, T1_TR, T1_BL, T1_BR])
-MyListener = CL.ComplexListener(World_T1, CGPrior, BiasPriors, MyFilter)
+MyListener = CL.ComplexListener(World_T1, CGPrior, BiasPriors, MyFilter, SpeakerRationalityNoise)
 MyListener.Infer(T1_Utterance)
 T1Res = MyListener.ComputePosterior(0)
 
@@ -272,7 +262,7 @@ T1_BL = PO.PhysicalObject("triangle", [OF.ObjectFeature("blue", "color")], "BL")
 T1_BR = PO.PhysicalObject("circle", [OF.ObjectFeature("red", "color")], "BR")
 CGPrior = BF.Belief(4, [T1_TL.Id, T1_TR.Id, T1_BL.Id, T1_BR.Id], [0.5, 0.5, 0.5, 0.5])  # Priors from common ground
 World_T1 = VW.VisualWorld([T1_TL, T1_TR, T1_BL, T1_BR])
-MyListener = CL.ComplexListener(World_T1, CGPrior, BiasPriors, MyFilter)
+MyListener = CL.ComplexListener(World_T1, CGPrior, BiasPriors, MyFilter, SpeakerRationalityNoise)
 MyListener.Infer(T1_Utterance)
 T1Res = MyListener.ComputePosterior(0)
 
@@ -340,19 +330,13 @@ T4_Utterance = UT.Utterance("square")
 T5_Utterance = UT.Utterance("circle", [OF.ObjectFeature("yellow", "color")])
 T6_Utterance = UT.Utterance("rectangle")
 
-
-# General parameters
-# Build a filter for the hypothesis space
-MyFilter = Filter.Filter(3, 3)  # Common ground must have three objects (one object is not seen).
-BiasPriors = [SF.BuildBeta(0.55, 0.82, "color")]  # Parameters estimated from participant data.
-
 T1_TL = PO.PhysicalObject("rectangle", [OF.ObjectFeature("yellow", "color")], "TL")
 T1_TR = PO.PhysicalObject("triangle", [OF.ObjectFeature("green", "color")], "TR")
 T1_BL = PO.PhysicalObject("triangle", [OF.ObjectFeature("blue", "color")], "BL")
 T1_BR = PO.PhysicalObject("circle", [OF.ObjectFeature("red", "color")], "BR")
 CGPrior = BF.Belief(4, [T1_TL.Id, T1_TR.Id, T1_BL.Id, T1_BR.Id], [0.5, 0.5, 0.5, 0.5])  # Priors from common ground
 World_T1 = VW.VisualWorld([T1_TL, T1_TR, T1_BL, T1_BR])
-MyListener = CL.ComplexListener(World_T1, CGPrior, BiasPriors, MyFilter)
+MyListener = CL.ComplexListener(World_T1, CGPrior, BiasPriors, MyFilter, SpeakerRationalityNoise)
 MyListener.Infer(T1_Utterance)
 T1Res = MyListener.ComputePosterior(0)
 
