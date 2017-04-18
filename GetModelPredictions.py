@@ -23,6 +23,7 @@ T6_Utterance = UT.Utterance("rectangle")
 
 # General parameters
 # Build a filter for the hypothesis space
+# First parameter is minimum number of objects the speaker may see.
 MyFilter = Filter.Filter(3, 3)  # Common ground must have three objects (one object is not seen).
 BiasPriors = [SF.BuildBeta(0.39, 0.32, "color")]  # Parameters estimated from participant data.
 SpeakerRationalityNoise = 0.055  # Fit from participant data.
