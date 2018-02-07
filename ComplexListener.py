@@ -134,7 +134,7 @@ class ComplexListener:
 
         args:
         referentNo (int): When referent is not None, this is the referent object that gets
-            computer in the reference posterior. When is it None, the referent posterior is over all combinations of referents.
+            computed in the reference posterior. When is it None, the referent posterior is over all combinations of referents.
         update (bool): When set to True, the call also Updates the hypothesis space.
         """
         if update:
