@@ -49,7 +49,7 @@ class Speaker:
                 SampledUtterance.InsertFeature(currentfeature)
         return SampledUtterance
 
-    def Communicate(self, target, giveup = 500):
+    def Communicate(self, target, giveup = 10):
         """
         Return a probability distribution over possible utterances.
         In this simple case, the only thing at stake is whether
