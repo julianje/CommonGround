@@ -49,7 +49,7 @@ class Speaker:
                 SampledUtterance.InsertFeature(currentfeature)
         return SampledUtterance
 
-    def Communicate(self, target):
+    def Communicate(self, target, giveup = 500):
         """
         Return a probability distribution over possible utterances.
         In this simple case, the only thing at stake is whether
@@ -66,7 +66,11 @@ class Speaker:
             return Utterance
         InferredBelief = ImaginedListener.InferReferent(Utterance)
         # Loop here until you find a suitable utterance
+        tries = 0
         while(not InferredBelief.Certain()):
+            tries = tries + 1
+            if tries >= giveup:
+                return Utterance
             Utterance = self.SampleUtterance(target)
             InferredBelief = ImaginedListener.InferReferent(Utterance)
         return Utterance
