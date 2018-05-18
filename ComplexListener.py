@@ -95,7 +95,7 @@ class ComplexListener:
         """
         # Each speaker object needs a visual world, and a bias object.
         # Build space of possible visual worlds
-        #sys.stdout.write("Building visual world space.\n")
+        # sys.stdout.write("Building visual world space.\n")
         [VW_HypothesisSpace, VW_Priors] = SF.BuildVWHypSpace(
             self.VisualWorld, self.CommonGroundPrior, self.Filter)
         # Now build hypothesis spaces over speaker biases.
@@ -104,24 +104,24 @@ class ComplexListener:
             self.BiasPriors)
         # Next we need to combine these two to build a massive hypothesis
         # space.
-        #sys.stdout.write("Building full hypothesis space.\n")
+        # sys.stdout.write("Building full hypothesis space.\n")
         BiasNames = [x.name for x in self.BiasPriors]
         for SB_index in range(len(SpeakerBias_Priors)):
             # Pack things into a set of Bias objects
-            #sys.stdout.write("\tbuilding speaker biases.\n")
+            # sys.stdout.write("\tbuilding speaker biases.\n")
             CurrentBias = Bias.Bias(
                 BiasNames, SpeakerBias_HypothesisSpace[SB_index])
             for VW_index in range(len(VW_Priors)):
                 # Now we also need to build the space of possible referents.
                 # First build the speaker object.
-                #sys.stdout.write("\tbuilding speaker object.\n")
+                # sys.stdout.write("\tbuilding speaker object.\n")
                 TestSpeaker = Speaker.Speaker(
                     VW_HypothesisSpace[VW_index], CurrentBias, self.SpeakerRationalityNoise)
                 # Now iterate over the space of referents and get
                 # the probability of producing the utterance.
-                #sys.stdout.write("\t\titerating over referents.\n")
+                # sys.stdout.write("\t\titerating over referents.\n")
                 for testobject in TestSpeaker.VisualWorld.objects:
-                    # sys.stdout.write(".")
+                    sys.stdout.write(".")
                     p = TestSpeaker.GetUtteranceProbability(
                         utterance, testobject, samples)
                     self.HypothesisSpace.InsertHypothesis(Hypothesis.Hypothesis(VW_HypothesisSpace[
