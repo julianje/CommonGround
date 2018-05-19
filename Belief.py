@@ -12,6 +12,8 @@ class Belief:
         By default a uniform prior is built. But if a vector with priors is provided
         then that one is used.
 
+        All code treats the prior as the probability that the object is *visible*!
+
         Args:
         HypothesisSize (int): Number of hypothesis
         values (list): Optional list of values of each hypothesis.

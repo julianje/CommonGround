@@ -12,7 +12,10 @@ class ComplexListener:
     def __init__(self, VisualWorld, CommonGroundPrior, BiasPriors, Filter=None, SpeakerRationalityNoise=0.1):
         """
         VisualWorld is a VisualWorld object.
-        CommonGroundPrior is a belief object.
+        CommonGroundPrior is a belief object. CommonGround prior is the same length as the number of objects
+        and each entry indicates the probability that object i is visible!
+        For instance, a prior of [1,1,1,1] means there are four fully-observable objects.
+
         BiasPriors is a list of Belief objects that represent belief distributions over each kind
         of production bias that the speaker may have.
 
