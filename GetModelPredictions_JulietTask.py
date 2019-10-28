@@ -26,12 +26,12 @@ BR_Keys = [["large","star"],["small","circle"],["large","square"],["large","rect
 Utterance_Unr = [["large","square"],["small","circle"],["small","triangle"],["large","rectangle"],["","star"]]
 Utterance_Rel = [["","square"],["","circle"],["small","triangle"],["","rectangle"],["","star"]]
 
-Utterance_List = Utterance_Rel
+Utterance_List = Utterance_Unr
 
 Verbose = False
 
-BetaParameters = [0.39, 0.32]
-SpeakerRationalityNoise = 0.055
+BetaParameters = [0.32, 1.12]
+SpeakerRationalityNoise = 0.057
 
 MyFilter = Filter.Filter(3, 3)  # Common ground must have three objects.
 BiasPriors = [SF.BuildBeta(BetaParameters[0], BetaParameters[1], "size")]
