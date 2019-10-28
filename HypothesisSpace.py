@@ -88,6 +88,21 @@ class HypothesisSpace:
         Norm = sum(Beliefs)
         return [VisualWorlds, [x/Norm for x in Beliefs]]
 
+    def ComputeVWPosterior_ObjSpecific(self):
+        [VisualWorlds, Probability] = self.ComputeVWPosterior()
+        Objects = []
+        Beliefs = []
+        for index in range(len(VisualWorlds)):
+                # Now cicle through the objects in the visual world.
+            for obj in VisualWorlds[index]:
+                if obj not in Objects:
+                    Objects.append(obj)
+                    Beliefs.append(Probability[index])
+                else:
+                    location = Objects.index(obj)
+                    Beliefs[location] += Probability[index]
+        return [Objects, Beliefs]
+
     def ComputeBiasPosterior(self):
         """
         Compute the posterior over speaker biases.
@@ -117,7 +132,8 @@ class HypothesisSpace:
             for HypothesisIndex in range(len(Biases)):
                 p += Biases[HypothesisIndex][BiasIndex] * \
                     Beliefs[HypothesisIndex]
-            ExpVals.append([BiasTypes[BiasIndex], p])
+            ExpVals.append(
+                [BiasTypes[BiasIndex], p])
         return ExpVals
 
     def ComputeReferentPosterior(self, ReferentNo=None):

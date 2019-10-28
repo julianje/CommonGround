@@ -9,10 +9,13 @@ import HypothesisSpace as HS
 
 class ComplexListener:
 
-    def __init__(self, VisualWorld, CommonGroundPrior, BiasPriors):
+    def __init__(self, VisualWorld, CommonGroundPrior, BiasPriors, Filter=None, SpeakerRationalityNoise=0.1):
         """
         VisualWorld is a VisualWorld object.
-        CommonGroundPrior is a belief object.
+        CommonGroundPrior is a belief object. CommonGround prior is the same length as the number of objects
+        and each entry indicates the probability that object i is visible!
+        For instance, a prior of [1,1,1,1] means there are four fully-observable objects.
+
         BiasPriors is a list of Belief objects that represent belief distributions over each kind
         of production bias that the speaker may have.
 
@@ -20,6 +23,8 @@ class ComplexListener:
         VisualWorld: Object of class VisualWorld
         CommonGroundPrior: Object of class Belief
         BiasPriors: List of objects of type belief
+        Filter: Object of type filter. Filter.Check() is used to apply logical constraints to visual world hypothesis space.
+        SpeakerRationalityNoise: Listener's belief in the probability that the speaker will be accidentally underinformative (e.g. saying "circle" when there are two circles).
         """
         self.VisualWorld = VisualWorld
         self.CommonGroundPrior = CommonGroundPrior
@@ -29,6 +34,8 @@ class ComplexListener:
         if CommonGroundPrior.values != [obj.Id for obj in VisualWorld.objects]:
             print "ERROR: CommonGround prior object doesn't match the VisualWorld objects. Perhaps you used PhysicalObject.name instead of PhysicalObject.Id in the common ground prior constructor? Is the order in the visual world different from the order in the common ground priors?"
         self.BiasPriors = BiasPriors
+        self.Filter = Filter
+        self.SpeakerRationalityNoise = SpeakerRationalityNoise
         self.HypothesisSpace = HS.HypothesisSpace()
 
     def ChangeVisualWorld(self, NewVisualWorld):
@@ -66,7 +73,7 @@ class ComplexListener:
         Take an existing hypothesis space and compute the posterior
         """
         [VW_HypothesisSpace, VW_Priors] = SF.BuildVWHypSpace(
-            self.VisualWorld, self.CommonGroundPrior)
+            self.VisualWorld, self.CommonGroundPrior, self.Filter)
         [SpeakerBias_HypothesisSpace, SpeakerBias_Priors] = SF.BuildBiasHypSpace(
             self.BiasPriors)
         BiasNames = [x.name for x in self.BiasPriors]
@@ -76,7 +83,7 @@ class ComplexListener:
                 BiasNames, SpeakerBias_HypothesisSpace[SB_index])
             for VW_index in range(len(VW_Priors)):
                 TestSpeaker = Speaker.Speaker(
-                    VW_HypothesisSpace[VW_index], CurrentBias)
+                    VW_HypothesisSpace[VW_index], CurrentBias, self.SpeakerRationalityNoise)
                 for testobject in TestSpeaker.VisualWorld.objects:
                     p = TestSpeaker.GetUtteranceProbability(
                         utterance, testobject, samples)
@@ -93,7 +100,7 @@ class ComplexListener:
         # Build space of possible visual worlds
         #sys.stdout.write("Building visual world space.\n")
         [VW_HypothesisSpace, VW_Priors] = SF.BuildVWHypSpace(
-            self.VisualWorld, self.CommonGroundPrior)
+            self.VisualWorld, self.CommonGroundPrior, self.Filter)
         # Now build hypothesis spaces over speaker biases.
         #sys.stdout.write("Building speaker bias space.\n")
         [SpeakerBias_HypothesisSpace, SpeakerBias_Priors] = SF.BuildBiasHypSpace(
@@ -112,34 +119,31 @@ class ComplexListener:
                 # First build the speaker object.
                 #sys.stdout.write("\tbuilding speaker object.\n")
                 TestSpeaker = Speaker.Speaker(
-                    VW_HypothesisSpace[VW_index], CurrentBias)
+                    VW_HypothesisSpace[VW_index], CurrentBias, self.SpeakerRationalityNoise)
                 # Now iterate over the space of referents and get
                 # the probability of producing the utterance.
                 #sys.stdout.write("\t\titerating over referents.\n")
                 for testobject in TestSpeaker.VisualWorld.objects:
-                    # sys.stdout.write(".")
+                    #sys.stdout.write(".")
                     p = TestSpeaker.GetUtteranceProbability(
                         utterance, testobject, samples)
                     self.HypothesisSpace.InsertHypothesis(Hypothesis.Hypothesis(VW_HypothesisSpace[
                                                           VW_index], CurrentBias, testobject, utterance, VW_Priors[VW_index], SpeakerBias_Priors[SB_index], p))
 
-    def ComputePosterior(self, update=True):
+    def ComputePosterior(self, referentNo=None, update=True):
         """
         Given the hypothesis space, compute the belief in speaker biases,
         visual access, and referent.
 
         args:
+        referentNo (int): When referent is not None, this is the referent object that gets
+            computed in the reference posterior. When is it None, the referent posterior is over all combinations of referents.
         update (bool): When set to True, the call also Updates the hypothesis space.
         """
-        # First compute the belief in each target.
-        # Kind of inefficient, but works.
-        # Build a normalizing vector
-        #[VW_HypothesisSpace, VW_Priors] = SF.BuildVWHypSpace(
-        #    self.VisualWorld, self.CommonGroundPrior)
-        # Uses next hypothesis space as current one.
         if update:
             self.HypothesisSpace.MoveForward()
         VWResult = self.HypothesisSpace.ComputeVWPosterior()
+        VWSeparate = self.HypothesisSpace.ComputeVWPosterior_ObjSpecific()
         SBResult = self.HypothesisSpace.ComputeBiasPosterior()
-        RefResult = self.HypothesisSpace.ComputeReferentPosterior()
-        return [VWResult, SBResult, RefResult]
+        RefResult = self.HypothesisSpace.ComputeReferentPosterior(referentNo)
+        return [VWResult, VWSeparate, SBResult, RefResult]
